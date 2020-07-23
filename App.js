@@ -1,19 +1,38 @@
+// importing required dependencies
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import SplashScreen from './components/Start';
+import ChatScreen from './components/Chat';
+import 'react-native-gesture-handler';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import { StyleSheet, View, ScrollView, Text, TextInput, Alert, Button } from 'react-native';
 
-export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-    </View>
-  );
+// creates navigation for app
+const Stack = createStackNavigator();
+
+export default class App extends React.Component {
+
+ render() {
+
+   return (
+
+    // creates application and which screens can be accessed while in the app
+    <NavigationContainer>
+      {/* sets default screen to splash screen (home) */}
+      <Stack.Navigator
+        initialRouteName="SplashScreen"
+      >
+        {/* defines screens for navigation within screens */}
+        <Stack.Screen
+          name="Home"
+          component={SplashScreen}
+        />
+        <Stack.Screen
+          name="ChatScreen"
+          component={ChatScreen}
+        />
+      </Stack.Navigator>
+    </NavigationContainer>
+   );
+ }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
