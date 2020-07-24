@@ -5,7 +5,6 @@ import ChatScreen from './components/Chat';
 import 'react-native-gesture-handler';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import { StyleSheet, View, ScrollView, Text, TextInput, Alert, Button } from 'react-native';
 
 // creates navigation for app
 const Stack = createStackNavigator();
