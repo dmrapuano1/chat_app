@@ -81,7 +81,6 @@ export default class SplashScreen extends React.Component {
               <Text style={styles.buttonText}>Start Chatting</Text>
             </TouchableOpacity>
           </View>
-
         </View>
       </ImageBackground>
     )
