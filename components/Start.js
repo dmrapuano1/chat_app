@@ -20,7 +20,7 @@ export default class SplashScreen extends React.Component {
     const colorOptions = ['#090C08', '#474056', '#8A95A5', '#B9C6AE']
 
     // setting default of color in case user does not select one
-    this.setState({ color: colorOptions[0] })
+    if (this.state.color === '') this.setState({ color: colorOptions[0] })
 
     return (
 
