@@ -5,6 +5,7 @@ import { GiftedChat } from 'react-native-gifted-chat';
 
 // calling default function with parameter of props so props are usable throughout
 export default function ChatScreen(props) {
+
   const [messages, setMessages] = useState([]);
   const [background, setBackground] = useState([]);
   const [userName, setName] = useState([]);
@@ -37,7 +38,7 @@ export default function ChatScreen(props) {
         list.push({
           _id: list.length,
           text: data.body.text,
-          createdAt: data.body.createdAt,
+          createdAt: data.body.createdAt.toDate(),
           user: {
             _id: data.body.userID,
             name: data.body.userName,
@@ -45,8 +46,23 @@ export default function ChatScreen(props) {
           }
         });
       });
-      console.log(messages)
-    if (messages.length !== list.length) setMessages(list)
+
+      if (messages.length !== list.length) {
+        list.sort(function compare(a, b) {
+          const timestampA = a.createdAt
+          const timestampB = b.createdAt
+        
+          let comparison = 0;
+          if (timestampA > timestampB) {
+            comparison = -1;
+          } else if (timestampA < timestampB) {
+            comparison = 1;
+          }
+          return comparison;
+        });
+        console.log(list) 
+        setMessages(list)
+      }
     }
   };
 
@@ -92,7 +108,7 @@ export default function ChatScreen(props) {
     });
 
     authUnsubscribe();
-  }, [props.route.params]);
+  }, []);
 
   // useEffect(() => {
   //   setMessages([
