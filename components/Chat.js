@@ -9,14 +9,18 @@ export default function ChatScreen(props) {
   const [messages, setMessages] = useState([]);
   const [background, setBackground] = useState([]);
   const [userName, setName] = useState([]);
-  const [uid, setID] = useState([]);
-  const [logText, setLogText] = useState([]);
+  const [uid, setID] = useState('');
+  const [logStatus, setLogStatus] = useState(false);
+
+  console.log('Oustide', logStatus);
+  console.log(uid)
 
   // Defines firebase to use as DB
   const firebase = require('firebase');
   require('firebase/firestore');
 
   if (!firebase.apps.length){
+    console.log('Firebase')
     firebase.initializeApp({
       apiKey: "AIzaSyDoYIcYbogi7UxNPtI5B_Umyr3yaHYUgLo",
       authDomain: "chat-app-854ee.firebaseapp.com",
@@ -40,9 +44,7 @@ export default function ChatScreen(props) {
           text: data.body.text,
           createdAt: data.body.createdAt.toDate(),
           user: {
-            _id: data.body.userID,
-            name: data.body.userName,
-            avatar: 'https://placeimg.com/140/140/any'
+            _id: data.body.userID
           }
         });
       });
@@ -60,7 +62,6 @@ export default function ChatScreen(props) {
           }
           return comparison;
         });
-        console.log(list) 
         setMessages(list)
       }
     }
@@ -69,12 +70,14 @@ export default function ChatScreen(props) {
   // Defines and pulls collection 'chat' from firebase 
   const chatLog = firebase.firestore().collection('chat');
   
+  useEffect(() => {
   // Updates view to display current chat log
   function unsubscribe() {
     chatLog.onSnapshot(onChatUpdate)
   }
   
   unsubscribe();
+}, [uid])
 
   useEffect(() => {
     
@@ -93,48 +96,29 @@ export default function ChatScreen(props) {
     // sets top navbar to have title of the user's entered name
     props.navigation.setOptions({ title: userName });
 
+  }, []);
+  
     const authUnsubscribe = firebase.auth().onAuthStateChanged(async (user) => {
 
       // If user is not already signed in, creates anonymous user ID
-      if (!uid) {
-      console.log('Working')
-        await firebase.auth().signInAnonymously();
-        // set state of userID
-        setID(user.uid)
-      }
-  
-      // set state of welcome text, unique to this user
-      setLogText(`Welcome ${userName}, you have entered a chat`)
+      await firebase.auth().signInAnonymously();
+      // set state of userID
+      setID(user.uid)
+      setLogStatus(true)
+      console.log('Inside', logStatus)
     });
 
-    authUnsubscribe();
-  }, []);
+  useEffect(() => {
 
-  // useEffect(() => {
-  //   setMessages([
-  //     {
-  //       _id: 1,
-  //       text: `Hello ${userName}, start sending messages by typing in the field below`,
-  //       createdAt: new Date(),
-  //       user: {
-  //         _id: 2,
-  //         name: 'React Native',
-  //         avatar: 'https://placeimg.com/140/140/any',
-  //       },
-  //     },
-  //     {
-  //      _id: 2,
-  //      text: logText,
-  //      createdAt: new Date(),
-  //      system: true,
-  //     },
-  //   ])
-  // }, [])
+    console.log('000000000000000000000000000000000000000000000000000000000000000000000000')
+
+    authUnsubscribe();
+  }, [!uid]);
 
   const onSend = useCallback((messages = []) => {
     let body = messages[0]
-    chatLog.add({body})
     console.log('messages', messages[0])
+    chatLog.add({body})
     setMessages(previousMessages => 
       GiftedChat.append(previousMessages, messages))
   }, [])
