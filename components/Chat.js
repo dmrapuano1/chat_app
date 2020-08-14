@@ -6,13 +6,12 @@ import { GiftedChat } from 'react-native-gifted-chat';
 // calling default function with parameter of props so props are usable throughout
 export default function ChatScreen(props) {
 
+  // Defining state of variables 
   const [messages, setMessages] = useState([]);
   const [background, setBackground] = useState([]);
   const [userName, setName] = useState([]);
   const [uid, setID] = useState('');
-  const [logStatus, setLogStatus] = useState(false);
 
-  console.log('Oustide', logStatus);
   console.log(uid)
 
   // Defines firebase to use as DB
@@ -31,13 +30,14 @@ export default function ChatScreen(props) {
     });
   }
 
+  // Function that runs on update of firebase
   function onChatUpdate (querySnapshot) {
     console.log('///////////////// In on chat update /////////////////');
     const list = [];
     // go through each document
     if (querySnapshot) {
       querySnapshot.forEach((doc) => {
-        // get the QueryDocumentSnapshot's data
+        // gets the data from the documents
         var data = doc.data();
         list.push({
           _id: list.length,
@@ -49,7 +49,11 @@ export default function ChatScreen(props) {
         });
       });
 
+      // If/else statement to prevent multiple re-renders
       if (messages.length !== list.length) {
+
+        // Sorts list by timestamp 
+          // Database stores by random ID - this ensures messages are always sorted properly
         list.sort(function compare(a, b) {
           const timestampA = a.createdAt
           const timestampB = b.createdAt
@@ -62,7 +66,9 @@ export default function ChatScreen(props) {
           }
           return comparison;
         });
-        setMessages(list)
+
+        // Sets messages to display as the list created above
+        setMessages(list);
       }
     }
   };
@@ -71,14 +77,15 @@ export default function ChatScreen(props) {
   const chatLog = firebase.firestore().collection('chat');
   
   useEffect(() => {
-  // Updates view to display current chat log
-  function unsubscribe() {
-    chatLog.onSnapshot(onChatUpdate)
-  }
-  
-  unsubscribe();
-}, [uid])
+    // Updates view to display current chat log
+    function unsubscribe() {
+      chatLog.onSnapshot(onChatUpdate)
+    }
+    
+    unsubscribe();
+  }, [uid])
 
+  // Pulls data from props
   useEffect(() => {
     
     // pulls props from previous screen
@@ -98,27 +105,30 @@ export default function ChatScreen(props) {
 
   }, []);
   
+
+  // useEffect set to run only if user is not logged in
+  useEffect(() => {
+
     const authUnsubscribe = firebase.auth().onAuthStateChanged(async (user) => {
 
       // If user is not already signed in, creates anonymous user ID
       await firebase.auth().signInAnonymously();
       // set state of userID
       setID(user.uid)
-      setLogStatus(true)
-      console.log('Inside', logStatus)
+
     });
-
-  useEffect(() => {
-
-    console.log('000000000000000000000000000000000000000000000000000000000000000000000000')
 
     authUnsubscribe();
   }, [!uid]);
 
+  // Function called on submit button
   const onSend = useCallback((messages = []) => {
+    // Defines portion of document to send to database
     let body = messages[0]
     console.log('messages', messages[0])
+    // Adds new message to firebase
     chatLog.add({body})
+    // Adds new message to UI
     setMessages(previousMessages => 
       GiftedChat.append(previousMessages, messages))
   }, [])
