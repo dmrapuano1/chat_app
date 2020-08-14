@@ -76,6 +76,7 @@ export default function ChatScreen(props) {
   // Defines and pulls collection 'chat' from firebase 
   const chatLog = firebase.firestore().collection('chat');
   
+  // Runs only when user is logged in
   useEffect(() => {
     // Updates view to display current chat log
     function unsubscribe() {
