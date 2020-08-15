@@ -1,13 +1,13 @@
 // imports required dependencies
 import React, { useState, useCallback, useEffect } from 'react';
-import { View } from 'react-native';
+import { View, AsyncStorage } from 'react-native';
 import { GiftedChat } from 'react-native-gifted-chat';
 import NetInfo from '@react-native-community/netinfo';
 
 // calling default function with parameter of props so props are usable throughout
 export default function ChatScreen(props) {
 
-  // Defining state of variables 
+  // Defining state of variables and setState functions
   const [messages, setMessages] = useState([]);
   const [background, setBackground] = useState('');
   const [userName, setName] = useState('');
@@ -19,7 +19,6 @@ export default function ChatScreen(props) {
   require('firebase/firestore');
 
   console.log(uid)
-
 
   // If app hasn't defined the database, defines database
   if (!firebase.apps.length){
@@ -34,42 +33,57 @@ export default function ChatScreen(props) {
   }
 
   // Defines and pulls collection 'chat' from firebase 
-  const chatLog = firebase.firestore().collection('chat').orderBy('createdAt', 'desc');
+  const chatLog = firebase.firestore().collection('chat');
 
   // Gets network status
   NetInfo.fetch().then(isConnected => {
+    console.log('Checking')
     // If online, sets isOnline to true, else sets to false
     isConnected ? setOnline(true) : setOnline(false)
+    console.log(isOnline)
   });
 
   // Function that runs on update of firebase
   function onChatUpdate (querySnapshot) {
-    console.log('///////////////// In on chat update /////////////////');
     const list = [];
-    // go through each document
     if (querySnapshot) {
+      // go through each document
       querySnapshot.forEach((doc) => {
         // gets the data from the documents
         var data = doc.data();
+        // Pushes next item into list and translates database data
         list.push({
           _id: list.length,
           text: data.body.text,
           createdAt: data.body.createdAt.toDate(),
           user: {
-            _id: data.body.userID
+            _id: data.body.user._id
           }
         });
       });
 
       // If/else statement to prevent multiple re-renders
-      if (messages.length !== list.length) {
+      if (messages.length !== list.length) { 
+        // Sorts list by timestamp       
+        list.sort(function compare(a, b) {
+        const timestampA = a.createdAt
+        const timestampB = b.createdAt
+      
+        let comparison = 0;
+        if (timestampA > timestampB) {
+          comparison = -1;
+        } else if (timestampA < timestampB) {
+          comparison = 1;
+        }
+        return comparison;
+      });
         // Sets messages to display as the list created above
         setMessages(list);
       }
     }
   };
 
-  // Runs only when user is online
+  // Runs only when user is online (unsubscribe)
   useEffect(() => {
     // Updates view to display current chat log
     function unsubscribe() {
@@ -77,9 +91,10 @@ export default function ChatScreen(props) {
     }
     
     unsubscribe();
-  }, [isOnline])
+  }, [])
 
-  // Runs only when user is offline
+  // Runs only when user is offline (placeHolder)
+  // In progress 
   useEffect(() => {
     console.log('Offline')
   }, [!isOnline])
@@ -104,7 +119,7 @@ export default function ChatScreen(props) {
 
   }, []);
   
-  // useEffect set to run only if user is not logged in
+  // useEffect set to run only if user is not logged in (authUnsubscribe)
   useEffect(() => {
 
     const authUnsubscribe = firebase.auth().onAuthStateChanged(async (user) => {
@@ -119,9 +134,23 @@ export default function ChatScreen(props) {
     authUnsubscribe();
   }, [!uid]);
 
+  // Saves messages to local storage (AsyncStorage)
+  // In progress
   const saveMessages = async () => {
     try {
       await AsyncStorage.setItem('messages', JSON.stringify(this.state.messages));
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  // Pulls messages from local storage (AsyncStorage)
+  // In progress 
+  const getMessages = async () => {
+    let messages = '';
+    try {
+      messages = await AsyncStorage.getItem('messages') || [];
+      console.log(JSON.parse(messages));
     } catch (error) {
       console.log(error.message);
     }
