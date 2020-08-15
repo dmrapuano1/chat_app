@@ -14,23 +14,15 @@ export default function ChatScreen(props) {
   const [uid, setID] = useState('');
   const [isOnline, setOnline] = useState(false)
 
-  console.log(uid)
-
-  // Gets network status
-  NetInfo.fetch().then(isConnected => {
-    // If online, sets isOnline to true, else sets to false
-    isConnected ? setOnline(true) : setOnline(false)
-  });
-
   // Defines firebase to use as DB
   const firebase = require('firebase');
   require('firebase/firestore');
 
-  // Defines and pulls collection 'chat' from firebase 
-  const chatLog = firebase.firestore().collection('chat');
+  console.log(uid)
 
+
+  // If app hasn't defined the database, defines database
   if (!firebase.apps.length){
-    console.log('Firebase')
     firebase.initializeApp({
       apiKey: "AIzaSyDoYIcYbogi7UxNPtI5B_Umyr3yaHYUgLo",
       authDomain: "chat-app-854ee.firebaseapp.com",
@@ -40,6 +32,15 @@ export default function ChatScreen(props) {
       messagingSenderId: "1056389705300"
     });
   }
+
+  // Defines and pulls collection 'chat' from firebase 
+  const chatLog = firebase.firestore().collection('chat').orderBy('createdAt', 'desc');
+
+  // Gets network status
+  NetInfo.fetch().then(isConnected => {
+    // If online, sets isOnline to true, else sets to false
+    isConnected ? setOnline(true) : setOnline(false)
+  });
 
   // Function that runs on update of firebase
   function onChatUpdate (querySnapshot) {
@@ -62,22 +63,6 @@ export default function ChatScreen(props) {
 
       // If/else statement to prevent multiple re-renders
       if (messages.length !== list.length) {
-
-        // Sorts list by timestamp 
-          // Database stores by random ID - this ensures messages are always sorted properly
-        list.sort(function compare(a, b) {
-          const timestampA = a.createdAt
-          const timestampB = b.createdAt
-        
-          let comparison = 0;
-          if (timestampA > timestampB) {
-            comparison = -1;
-          } else if (timestampA < timestampB) {
-            comparison = 1;
-          }
-          return comparison;
-        });
-
         // Sets messages to display as the list created above
         setMessages(list);
       }
@@ -93,6 +78,11 @@ export default function ChatScreen(props) {
     
     unsubscribe();
   }, [isOnline])
+
+  // Runs only when user is offline
+  useEffect(() => {
+    console.log('Offline')
+  }, [!isOnline])
 
   // Pulls data from props
   useEffect(() => {
@@ -129,6 +119,14 @@ export default function ChatScreen(props) {
     authUnsubscribe();
   }, [!uid]);
 
+  const saveMessages = async () => {
+    try {
+      await AsyncStorage.setItem('messages', JSON.stringify(this.state.messages));
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
   // Function called on submit button
   const onSend = useCallback((messages = []) => {
     // Defines portion of document to send to database
@@ -138,7 +136,10 @@ export default function ChatScreen(props) {
     chatLog.add({body})
     // Adds new message to UI
     setMessages(previousMessages => 
-      GiftedChat.append(previousMessages, messages))
+      GiftedChat.append(previousMessages, messages)
+    ), () => {
+      saveMessages();
+    }
   }, [])
 
   return (
