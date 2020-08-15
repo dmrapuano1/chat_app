@@ -1,22 +1,33 @@
 // imports required dependencies
 import React, { useState, useCallback, useEffect } from 'react';
-import { View, Text} from 'react-native';
+import { View } from 'react-native';
 import { GiftedChat } from 'react-native-gifted-chat';
+import NetInfo from '@react-native-community/netinfo';
 
 // calling default function with parameter of props so props are usable throughout
 export default function ChatScreen(props) {
 
   // Defining state of variables 
   const [messages, setMessages] = useState([]);
-  const [background, setBackground] = useState([]);
-  const [userName, setName] = useState([]);
+  const [background, setBackground] = useState('');
+  const [userName, setName] = useState('');
   const [uid, setID] = useState('');
+  const [isOnline, setOnline] = useState(false)
 
   console.log(uid)
+
+  // Gets network status
+  NetInfo.fetch().then(isConnected => {
+    // If online, sets isOnline to true, else sets to false
+    isConnected ? setOnline(true) : setOnline(false)
+  });
 
   // Defines firebase to use as DB
   const firebase = require('firebase');
   require('firebase/firestore');
+
+  // Defines and pulls collection 'chat' from firebase 
+  const chatLog = firebase.firestore().collection('chat');
 
   if (!firebase.apps.length){
     console.log('Firebase')
@@ -73,10 +84,7 @@ export default function ChatScreen(props) {
     }
   };
 
-  // Defines and pulls collection 'chat' from firebase 
-  const chatLog = firebase.firestore().collection('chat');
-  
-  // Runs only when user is logged in
+  // Runs only when user is online
   useEffect(() => {
     // Updates view to display current chat log
     function unsubscribe() {
@@ -84,7 +92,7 @@ export default function ChatScreen(props) {
     }
     
     unsubscribe();
-  }, [uid])
+  }, [isOnline])
 
   // Pulls data from props
   useEffect(() => {
@@ -106,7 +114,6 @@ export default function ChatScreen(props) {
 
   }, []);
   
-
   // useEffect set to run only if user is not logged in
   useEffect(() => {
 
