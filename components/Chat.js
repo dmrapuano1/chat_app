@@ -1,7 +1,7 @@
 // imports required dependencies
 import React, { useState, useCallback, useEffect } from 'react';
 import { View, AsyncStorage } from 'react-native';
-import { GiftedChat } from 'react-native-gifted-chat';
+import { GiftedChat, InputToolbar } from 'react-native-gifted-chat';
 import NetInfo from '@react-native-community/netinfo';
 
 // calling default function with parameter of props so props are usable throughout
@@ -12,13 +12,12 @@ export default function ChatScreen(props) {
   const [background, setBackground] = useState('');
   const [userName, setName] = useState('');
   const [uid, setID] = useState('');
-  const [isOnline, setOnline] = useState(false)
+  const [isOnline, setOnline] = useState('');
+  const [test, setTest] = useState('')
 
   // Defines firebase to use as DB
   const firebase = require('firebase');
   require('firebase/firestore');
-
-  console.log(uid)
 
   // If app hasn't defined the database, defines database
   if (!firebase.apps.length){
@@ -37,10 +36,8 @@ export default function ChatScreen(props) {
 
   // Gets network status
   NetInfo.fetch().then(isConnected => {
-    console.log('Checking')
     // If online, sets isOnline to true, else sets to false
     isConnected ? setOnline(true) : setOnline(false)
-    console.log(isOnline)
   });
 
   // Function that runs on update of firebase
@@ -68,7 +65,7 @@ export default function ChatScreen(props) {
         list.sort(function compare(a, b) {
         const timestampA = a.createdAt
         const timestampB = b.createdAt
-      
+        // Defines to sort from oldest to newest (A > B = +1 is newest to oldest)
         let comparison = 0;
         if (timestampA > timestampB) {
           comparison = -1;
@@ -77,6 +74,7 @@ export default function ChatScreen(props) {
         }
         return comparison;
       });
+        getMessages();
         // Sets messages to display as the list created above
         setMessages(list);
       }
@@ -89,48 +87,32 @@ export default function ChatScreen(props) {
     function unsubscribe() {
       chatLog.onSnapshot(onChatUpdate)
     }
-    
     unsubscribe();
   }, [])
 
-  // Runs only when user is offline (placeHolder)
-  // In progress 
-  useEffect(() => {
-    console.log('Offline')
-  }, [!isOnline])
-
-  // Pulls data from props
+  // Pulls data from props (Written to run only if userName is not defined)
   useEffect(() => {
     
     // pulls props from previous screen
     let { name, color } = props.route.params;
 
-    // sets background color - if statement to keep from infinite re-renders
-    if (background !== color) setBackground(color);
-
-    // sets name to 'User' if the user left this section blank
-    if (!name && userName !== 'User') setName('User');
-    
-    // else sets name, done to prevent infinite re-renders
-    if (userName !== name && name) setName(name);
+    // Sets proper variables from props
+    setBackground(color);
+    name ? setName(name) : setName('User')
 
     // sets top navbar to have title of the user's entered name
     props.navigation.setOptions({ title: userName });
 
-  }, []);
+  }, [!userName]);
   
   // useEffect set to run only if user is not logged in (authUnsubscribe)
   useEffect(() => {
-
     const authUnsubscribe = firebase.auth().onAuthStateChanged(async (user) => {
-
       // If user is not already signed in, creates anonymous user ID
       await firebase.auth().signInAnonymously();
       // set state of userID
       setID(user.uid)
-
     });
-
     authUnsubscribe();
   }, [!uid]);
 
@@ -138,21 +120,29 @@ export default function ChatScreen(props) {
   // In progress
   const saveMessages = async () => {
     try {
-      await AsyncStorage.setItem('messages', JSON.stringify(this.state.messages));
+      await AsyncStorage.setItem('messages', JSON.stringify(messages));
     } catch (error) {
       console.log(error.message);
     }
   };
 
+  const deleteMessages = async () => {
+    try {
+      await AsyncStorage.removeItem('messages');
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
+
   // Pulls messages from local storage (AsyncStorage)
   // In progress 
   const getMessages = async () => {
-    let messages = '';
+    let messages = [];
     try {
-      messages = await AsyncStorage.getItem('messages') || [];
-      console.log(JSON.parse(messages));
+      messages = await AsyncStorage.getItem('messages');
+      messages ? setMessages(JSON.parse(messages)) : setMessages( [] )
     } catch (error) {
-      console.log(error.message);
+      console.log(error.messages);
     }
   };
 
@@ -160,16 +150,27 @@ export default function ChatScreen(props) {
   const onSend = useCallback((messages = []) => {
     // Defines portion of document to send to database
     let body = messages[0]
-    console.log('messages', messages[0])
     // Adds new message to firebase
     chatLog.add({body})
     // Adds new message to UI
     setMessages(previousMessages => 
       GiftedChat.append(previousMessages, messages)
-    ), () => {
-      saveMessages();
-    }
+    )
+    saveMessages();
   }, [])
+
+  function renderInputToolbar (props) {
+    if (!isOnline) {
+    } else {
+      return(
+        <InputToolbar
+        {...props}
+        />
+      );
+    }
+  }
+
+  // renderInputToolbar();
 
   return (
     
@@ -179,6 +180,7 @@ export default function ChatScreen(props) {
       {/* using react-native-gifted-chat to display and update messages in view */}
       <GiftedChat
         messages={messages}
+        renderInputToolbar={renderInputToolbar}
         // calls function to update Firebase with new message
         onSend={messages => onSend(messages)}
         user={{
