@@ -142,7 +142,8 @@ export default function ChatScreen(props) {
   }
 
   // Pulls messages from local storage (AsyncStorage)
-  const getMessages = async (messages = []) => {
+  const getMessages = async () => {
+    let messages = []
     try {
       messages = await AsyncStorage.getItem('messages');
       console.log(messages)
