@@ -1,8 +1,10 @@
 // imports required dependencies
 import React, { useState, useCallback, useEffect } from 'react';
-import { View, AsyncStorage } from 'react-native';
+import { View, AsyncStorage, Button } from 'react-native';
 import { GiftedChat, InputToolbar } from 'react-native-gifted-chat';
 import NetInfo from '@react-native-community/netinfo';
+import CustomActions from './CustomActions';
+import MapView from 'react-native-maps';
 
 // calling default function with parameter of props so props are usable throughout
 export default function ChatScreen(props) {
@@ -13,7 +15,6 @@ export default function ChatScreen(props) {
   const [userName, setName] = useState('');
   const [uid, setID] = useState('');
   const [isOnline, setOnline] = useState('');
-  const [test, setTest] = useState('')
 
   // Defines firebase to use as DB
   const firebase = require('firebase');
@@ -55,7 +56,9 @@ export default function ChatScreen(props) {
           createdAt: data.body.createdAt.toDate(),
           user: {
             _id: data.body.user._id
-          }
+          },
+          image: data.body.image || '',
+          location: data.body.location
         });
       });
 
@@ -74,12 +77,16 @@ export default function ChatScreen(props) {
         }
         return comparison;
       });
-        getMessages();
         // Sets messages to display as the list created above
         setMessages(list);
       }
     }
   };
+
+  // Pulls localStorage of messages if offline
+  useEffect(() => {
+    getMessages();
+  }, [!isOnline])
 
   // Runs only when user is online (unsubscribe)
   useEffect(() => {
@@ -88,7 +95,7 @@ export default function ChatScreen(props) {
       chatLog.onSnapshot(onChatUpdate)
     }
     unsubscribe();
-  }, [])
+  }, [uid])
 
   // Pulls data from props (Written to run only if userName is not defined)
   useEffect(() => {
@@ -117,7 +124,6 @@ export default function ChatScreen(props) {
   }, [!uid]);
 
   // Saves messages to local storage (AsyncStorage)
-  // In progress
   const saveMessages = async () => {
     try {
       await AsyncStorage.setItem('messages', JSON.stringify(messages));
@@ -126,6 +132,7 @@ export default function ChatScreen(props) {
     }
   };
 
+  // Testing function to clear localStorage
   const deleteMessages = async () => {
     try {
       await AsyncStorage.removeItem('messages');
@@ -135,7 +142,6 @@ export default function ChatScreen(props) {
   }
 
   // Pulls messages from local storage (AsyncStorage)
-  // In progress 
   const getMessages = async () => {
     let messages = [];
     try {
@@ -159,8 +165,11 @@ export default function ChatScreen(props) {
     saveMessages();
   }, [])
 
+  // Renders text-input
   function renderInputToolbar (props) {
+    // If not online, will render nothing
     if (!isOnline) {
+    // Else renders text-input
     } else {
       return(
         <InputToolbar
@@ -170,7 +179,40 @@ export default function ChatScreen(props) {
     }
   }
 
-  // renderInputToolbar();
+  // UI for show location function
+  function renderCustomView (props) {
+    const { currentMessage} = props;
+    // Filters through to only run on messages with location
+    if (currentMessage.location) {
+      return (
+        <View>
+          {/* Displays location on map */}
+          <MapView
+            // CSS for display
+            style={{width: 150,
+              height: 100,
+              borderRadius: 13,
+              margin: 3}}
+            region={{
+              // Data from geo-location
+              latitude: currentMessage.location.latitude,
+              longitude: currentMessage.location.longitude,
+              // Length and width of map by lat/lon
+              latitudeDelta: 0.0922,
+              longitudeDelta: 0.0421,
+            }}
+          />
+        </View>
+      );
+    }
+    // Returns no custom view if message doesn't include geo-location
+    return null;
+  }
+
+  // Renders ./CustomActions.js (expandable options bar)
+  function renderCustomActions (props) {
+    return <CustomActions {...props} />;
+  };
 
   return (
     
@@ -179,13 +221,18 @@ export default function ChatScreen(props) {
 
       {/* using react-native-gifted-chat to display and update messages in view */}
       <GiftedChat
+        // Renders messages
         messages={messages}
+        // Renders expandable options bar
+        renderActions={renderCustomActions}
+        // Renders map view when applicable 
+        renderCustomView={renderCustomView}
+        // Renders toolbar (text and options)
         renderInputToolbar={renderInputToolbar}
         // calls function to update Firebase with new message
         onSend={messages => onSend(messages)}
-        user={{
-          _id: uid,
-        }}
+        // Sets user so messages sent by this user will display on the right
+        user={{ _id: uid }}
       />
     </View>
   )
