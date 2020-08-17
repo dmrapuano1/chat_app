@@ -42,7 +42,7 @@ export default function ChatScreen(props) {
   });
 
   // Function that runs on update of firebase
-  function onChatUpdate (querySnapshot) {
+  const onChatUpdate = (querySnapshot) => {
     const list = [];
     if (querySnapshot) {
       // go through each document
@@ -79,6 +79,7 @@ export default function ChatScreen(props) {
       });
         // Sets messages to display as the list created above
         setMessages(list);
+        saveMessages();
       }
     }
   };
@@ -91,7 +92,7 @@ export default function ChatScreen(props) {
   // Runs only when user is online (unsubscribe)
   useEffect(() => {
     // Updates view to display current chat log
-    function unsubscribe() {
+    const unsubscribe = () => {
       chatLog.onSnapshot(onChatUpdate)
     }
     unsubscribe();
@@ -141,12 +142,12 @@ export default function ChatScreen(props) {
   }
 
   // Pulls messages from local storage (AsyncStorage)
-  const getMessages = async () => {
-    let messages = [];
+  const getMessages = async (messages = []) => {
     try {
       messages = await AsyncStorage.getItem('messages');
+      console.log(messages)
       messages ? setMessages(JSON.parse(messages)) : setMessages( [] )
-    } catch (e) { console.log(e.message) }
+    } catch (e) { console.log(e.data) }
   };
 
   // Function called on submit button
@@ -163,7 +164,7 @@ export default function ChatScreen(props) {
   }, [])
 
   // Renders text-input
-  function renderInputToolbar (props) {
+  const renderInputToolbar = (props) => {
     // If not online, will render nothing
     if (!isOnline) {
     // Else renders text-input
@@ -177,7 +178,7 @@ export default function ChatScreen(props) {
   }
 
   // UI for show location function
-  function renderCustomView (props) {
+  const renderCustomView = (props) => {
     const { currentMessage} = props;
     // Filters through to only run on messages with location
     if (currentMessage.location) {
@@ -207,7 +208,7 @@ export default function ChatScreen(props) {
   }
 
   // Renders ./CustomActions.js (expandable options bar)
-  function renderCustomActions (props) {
+  const renderCustomActions = (props) => {
     return <CustomActions {...props} />;
   };
 
