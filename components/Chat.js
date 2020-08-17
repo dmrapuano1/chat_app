@@ -131,7 +131,6 @@ export default function ChatScreen(props) {
     try {
       await AsyncStorage.setItem('messages', JSON.stringify(messages));
     } catch (e) { console.log(e.message) }
-    }
   };
 
   // Testing function to clear localStorage
