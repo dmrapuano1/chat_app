@@ -115,10 +115,13 @@ export default function ChatScreen(props) {
   // useEffect set to run only if user is not logged in (authUnsubscribe)
   useEffect(() => {
     const authUnsubscribe = firebase.auth().onAuthStateChanged(async (user) => {
-      // If user is not already signed in, creates anonymous user ID
-      await firebase.auth().signInAnonymously();
-      // set state of userID
-      setID(user.uid)
+      try {
+        // If user is not already signed in, creates anonymous user ID
+        await firebase.auth().signInAnonymously();
+        // set state of userID
+        setID(user.uid)
+        
+      } catch (e) { console.log(e.message) }
     });
     authUnsubscribe();
   }, [!uid]);
@@ -127,8 +130,7 @@ export default function ChatScreen(props) {
   const saveMessages = async () => {
     try {
       await AsyncStorage.setItem('messages', JSON.stringify(messages));
-    } catch (error) {
-      console.log(error.message);
+    } catch (e) { console.log(e.message) }
     }
   };
 
@@ -136,9 +138,7 @@ export default function ChatScreen(props) {
   const deleteMessages = async () => {
     try {
       await AsyncStorage.removeItem('messages');
-    } catch (error) {
-      console.log(error.message);
-    }
+    } catch (e) { console.log(e.message) }
   }
 
   // Pulls messages from local storage (AsyncStorage)
@@ -147,9 +147,7 @@ export default function ChatScreen(props) {
     try {
       messages = await AsyncStorage.getItem('messages');
       messages ? setMessages(JSON.parse(messages)) : setMessages( [] )
-    } catch (error) {
-      console.log(error.messages);
-    }
+    } catch (e) { console.log(e.message) }
   };
 
   // Function called on submit button

@@ -75,36 +75,39 @@ export default class CustomActions extends React.Component {
 
   // Uploads image to firebase with XTMHttp request
   uploadImage = async(uri) => {
-    // Defines blob (binary large object)
-    const blob = await new Promise((resolve, reject) => {
-      // Defines request type
-      const xhr = new XMLHttpRequest();
-      xhr.onload = () => {
-        resolve(xhr.response);
-      };
-      xhr.onerror = (e) => {
-        console.log(e);
-        reject(new TypeError('Network request failed'));
-      };
-      xhr.responseType = 'blob';
-      xhr.open('GET', uri, true);
-      xhr.send(null);
-    });
+    try {
+      // Defines blob (binary large object)
+      const blob = await new Promise((resolve, reject) => {
+        // Defines request type
+        const xhr = new XMLHttpRequest();
+        xhr.onload = () => {
+          resolve(xhr.response);
+        };
+        xhr.onerror = (e) => {
+          console.log(e);
+          reject(new TypeError('Network request failed'));
+        };
+        xhr.responseType = 'blob';
+        xhr.open('GET', uri, true);
+        xhr.send(null);
+      });
 
-    // Gives unique name to each image
-    const imageName = uri.split('/')
-  
-    // Defines how image is send to database
-    const ref = firebase
-      .storage()
-      .ref()
-      .child(`${imageName[0]}`);
+      // Gives unique name to each image
+      const imageName = uri.split('/')
+    
+      // Defines how image is send to database
+      const ref = firebase
+        .storage()
+        .ref()
+        .child(`${imageName[0]}`);
+        
+      const snapshot = await ref.put(blob);
+      blob.close();
+    
+      // Sends to database
+      return await snapshot.ref.getDownloadURL();
       
-    const snapshot = await ref.put(blob);
-    blob.close();
-  
-    // Sends to database
-    return await snapshot.ref.getDownloadURL();
+    } catch (e) { console.log(e.message) }
   }
 
   // Defines what options are in the menu
