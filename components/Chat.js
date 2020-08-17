@@ -48,7 +48,7 @@ export default function ChatScreen(props) {
       // go through each document
       querySnapshot.forEach((doc) => {
         // gets the data from the documents
-        var data = doc.data();
+        let data = doc.data();
         // Pushes next item into list and translates database data
         list.push({
           _id: list.length,
