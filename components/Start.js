@@ -1,12 +1,13 @@
-// importing required dependencies from react and react-native
+/* eslint linebreak-style: ['error', 'windows'] */
 import React from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, ImageBackground } from 'react-native';
+import { 
+  View, Text, TextInput, StyleSheet, TouchableOpacity, ImageBackground
+} from 'react-native';
 
 // importing image from assets
 const image = require('../assets/Background_Image.png')
 
 export default class SplashScreen extends React.Component {
- 
   constructor(props) {
     super(props);
 
@@ -15,7 +16,6 @@ export default class SplashScreen extends React.Component {
   }
 
   render() {
-    
     // creating an array of color options for ease to change if needed
     const colorOptions = ['#090C08', '#474056', '#8A95A5', '#B9C6AE']
 
@@ -26,7 +26,6 @@ export default class SplashScreen extends React.Component {
 
       // setting background image
       <ImageBackground source={image} style={styles.image}>
-
         {/* placing title */}
         <Text style={styles.title}>
           Chat App
@@ -83,7 +82,7 @@ export default class SplashScreen extends React.Component {
           </View>
         </View>
       </ImageBackground>
-    )
+    );
   }
 }
 
@@ -92,8 +91,8 @@ const styles = StyleSheet.create({
 
   image: {
     flex: 1,
-    resizeMode: "cover",
-    justifyContent: "center"
+    resizeMode: 'cover',
+    justifyContent: 'center',
   },
 
   title: {
@@ -102,7 +101,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#FFFFFF',
     alignSelf: 'center',
-    marginTop: 44
+    marginTop: 44,
   },
 
   box: {
@@ -113,7 +112,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     alignSelf: 'center',
     // most margins are percent to compensate for larger/smaller screens to have correct styling
-    marginBottom: '2%'
+    marginBottom: '2%',
   },
 
   input: {
@@ -136,7 +135,7 @@ const styles = StyleSheet.create({
     flex: 1,
     width: '88%',
     paddingLeft: 24,
-    paddingBottom: '2%'
+    paddingBottom: '2%',
   },
 
   colorPrompt: {
@@ -145,7 +144,7 @@ const styles = StyleSheet.create({
     color: '#757083',
     opacity: 100,
   },
-  
+
   choiceBox: {
     flex: 4,
     flexDirection: 'row',
@@ -153,7 +152,7 @@ const styles = StyleSheet.create({
     width: '80%',
     justifyContent: 'space-around',
     paddingLeft: 16,
-    marginTop: '2%'
+    marginTop: '2%',
   },
 
   colorSelector: {
@@ -163,7 +162,7 @@ const styles = StyleSheet.create({
     // creating circle using borderRadius
     borderRadius: 50,
     margin: 2,
-    borderColor: 'white'
+    borderColor: 'white',
   },
 
   chatButton: {
@@ -173,12 +172,12 @@ const styles = StyleSheet.create({
     height: '21%',
     alignItems: 'center',
   },
-  
+
   buttonText: {
     fontSize: 16,
     fontWeight: '600',
     color: '#FFFFFF',
     // set margin because button is a set size
-    marginTop: 16
-  }
-})
+    marginTop: 16,
+  },
+});

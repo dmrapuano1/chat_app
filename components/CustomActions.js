@@ -1,6 +1,9 @@
+/* eslint linebreak-style: ["error", "windows"] */
 import PropTypes from 'prop-types';
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  StyleSheet, Text, TouchableOpacity, View,
+} from 'react-native';
 import * as Permissions from 'expo-permissions';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
@@ -10,18 +13,17 @@ const firebase = require('firebase');
 require('firebase/firestore');
 
 export default class CustomActions extends React.Component {
-
   // Allows user to get picture from gallery
   pickImage = async () => {
     try {
       // Requests permission to access user's gallery
       const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
-  
+
       if (status === 'granted') {
         // Sets selected image to variable
-        let result = await ImagePicker.launchImageLibraryAsync({
+        const result = await ImagePicker.launchImageLibraryAsync({
           mediaTypes: 'Images',
-        }).catch(e => console.log(e));
+        }).catch((e) => console.log(e));
         // Sets image to display if user does not cancel upload
         if (!result.cancelled) {
           const imageUrl = await this.uploadImage(result.uri);
@@ -30,13 +32,13 @@ export default class CustomActions extends React.Component {
       }
     } catch (e) { console.log(e.message) }
   }
-  
+
   // Allows user to take a picture and upload to firebase
   takePhoto = async () => {
     try {
       // Requests permission to access user's gallery and camera
       const { status } = await Permissions.askAsync(Permissions.CAMERA, Permissions.CAMERA_ROLL);
-  
+
       if (status === 'granted') {
         // Sets selected image to variable
         const result = await ImagePicker.launchCameraAsync({
@@ -50,16 +52,16 @@ export default class CustomActions extends React.Component {
       }
     } catch (e) { console.log(e.message) }
   }
-  
+
   // Pulls user's location to send data to firebase
   getLocation = async () => {
     try {
       // Requests permission to access user's geo-location
       const { status } = await Permissions.askAsync(Permissions.LOCATION);
-  
-      if(status === 'granted') {
+
+      if (status === 'granted') {
         // Sets location to variable
-        let result = await Location.getCurrentPositionAsync({});
+        const result = await Location.getCurrentPositionAsync({});
         // Sets variable to location if successfully obtain user's location
         if (result) {
           this.props.onSend({
@@ -74,7 +76,7 @@ export default class CustomActions extends React.Component {
   }
 
   // Uploads image to firebase with XTMHttp request
-  uploadImage = async(uri) => {
+  uploadImage = async (uri) => {
     try {
       // Defines blob (binary large object)
       const blob = await new Promise((resolve, reject) => {
@@ -93,32 +95,30 @@ export default class CustomActions extends React.Component {
       });
 
       // Gives unique name to each image
-      const imageName = uri.split('/')
-    
+      const imageName = uri.split('/');
+
       // Defines how image is send to database
       const ref = firebase
         .storage()
         .ref()
         .child(`${imageName[0]}`);
-        
+
       const snapshot = await ref.put(blob);
       blob.close();
-    
+
       // Sends to database
       return await snapshot.ref.getDownloadURL();
-      
-    } catch (e) { console.log(e.message) }
+    } catch (e) { console.log(e.message); }
   }
 
   // Defines what options are in the menu
   onActionsPress = () => {
-
     // Defines options for menu
     const options = [
-      'Upload Picture', 
-      'Take Picture', 
-      'Send Location', 
-      'Cancel'
+      'Upload Picture',
+      'Take Picture',
+      'Send Location',
+      'Cancel',
     ];
 
     // Sets cancel button
@@ -145,7 +145,6 @@ export default class CustomActions extends React.Component {
   };
 
   render() {
-
     return (
       // Sets to modifiable button
       <TouchableOpacity 

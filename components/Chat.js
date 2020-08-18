@@ -1,14 +1,13 @@
-// imports required dependencies
-import React, { useState, useCallback, useEffect } from 'react';
-import { View, AsyncStorage, Button } from 'react-native';
+/* eslint linebreak-style: ['error', 'windows'] */
+import React, { useState, useCallback, useEffect } from 'react'; // \n
+import { View, AsyncStorage } from 'react-native';
 import { GiftedChat, InputToolbar } from 'react-native-gifted-chat';
 import NetInfo from '@react-native-community/netinfo';
-import CustomActions from './CustomActions';
 import MapView from 'react-native-maps';
+import CustomActions from './CustomActions';
 
 // calling default function with parameter of props so props are usable throughout
 export default function ChatScreen(props) {
-
   // Defining state of variables and setState functions
   const [messages, setMessages] = useState([]);
   const [background, setBackground] = useState('');
@@ -21,14 +20,14 @@ export default function ChatScreen(props) {
   require('firebase/firestore');
 
   // If app hasn't defined the database, defines database
-  if (!firebase.apps.length){
+  if (!firebase.apps.length) {
     firebase.initializeApp({
-      apiKey: "AIzaSyDoYIcYbogi7UxNPtI5B_Umyr3yaHYUgLo",
-      authDomain: "chat-app-854ee.firebaseapp.com",
-      databaseURL: "https://chat-app-854ee.firebaseio.com",
-      projectId: "chat-app-854ee",
-      storageBucket: "chat-app-854ee.appspot.com",
-      messagingSenderId: "1056389705300"
+      apiKey: 'AIzaSyDoYIcYbogi7UxNPtI5B_Umyr3yaHYUgLo',
+      authDomain: 'chat-app-854ee.firebaseapp.com',
+      databaseURL: 'https://chat-app-854ee.firebaseio.com',
+      projectId: 'chat-app-854ee',
+      storageBucket: 'chat-app-854ee.appspot.com',
+      messagingSenderId: '1056389705300'
     });
   }
 
@@ -36,7 +35,7 @@ export default function ChatScreen(props) {
   const chatLog = firebase.firestore().collection('chat');
 
   // Gets network status
-  NetInfo.fetch().then(isConnected => {
+  NetInfo.fetch().then((isConnected) => {
     // If online, sets isOnline to true, else sets to false
     isConnected ? setOnline(true) : setOnline(false)
   });
@@ -55,16 +54,16 @@ export default function ChatScreen(props) {
           text: data.body.text,
           createdAt: data.body.createdAt.toDate(),
           user: {
-            _id: data.body.user._id
+            _id: data.body.user._id,
           },
           image: data.body.image || '',
-          location: data.body.location
+          location: data.body.location,
         });
       });
 
       // If/else statement to prevent multiple re-renders
-      if (messages.length !== list.length) { 
-        // Sorts list by timestamp       
+      if (messages.length !== list.length) {
+        // Sorts list by timestamp
         list.sort(function compare(a, b) {
         const timestampA = a.createdAt
         const timestampB = b.createdAt
@@ -87,22 +86,21 @@ export default function ChatScreen(props) {
   // Pulls localStorage of messages if offline
   useEffect(() => {
     getMessages();
-  }, [!isOnline])
+  }, [!isOnline]);
 
   // Runs only when user is online (unsubscribe)
   useEffect(() => {
     // Updates view to display current chat log
     const unsubscribe = () => {
-      chatLog.onSnapshot(onChatUpdate)
-    }
+      chatLog.onSnapshot(onChatUpdate);
+    };
     unsubscribe();
-  }, [uid])
+  }, [uid]);
 
   // Pulls data from props (Written to run only if userName is not defined)
   useEffect(() => {
-    
     // pulls props from previous screen
-    let { name, color } = props.route.params;
+    const { name, color } = props.route.params;
 
     // Sets proper variables from props
     setBackground(color);
@@ -110,9 +108,8 @@ export default function ChatScreen(props) {
 
     // sets top navbar to have title of the user's entered name
     props.navigation.setOptions({ title: userName });
-
   }, [!userName]);
-  
+
   // useEffect set to run only if user is not logged in (authUnsubscribe)
   useEffect(() => {
     const authUnsubscribe = firebase.auth().onAuthStateChanged(async (user) => {
@@ -120,9 +117,8 @@ export default function ChatScreen(props) {
         // If user is not already signed in, creates anonymous user ID
         await firebase.auth().signInAnonymously();
         // set state of userID
-        setID(user.uid)
-        
-      } catch (e) { console.log(e.message) }
+        setID(user.uid);
+      } catch (e) { console.log(e.message); }
     });
     authUnsubscribe();
   }, [!uid]);
@@ -131,52 +127,45 @@ export default function ChatScreen(props) {
   const saveMessages = async () => {
     try {
       await AsyncStorage.setItem('messages', JSON.stringify(messages));
-    } catch (e) { console.log(e.message) }
+    } catch (e) { console.log(e.message); }
   };
 
   // Testing function to clear localStorage
   const deleteMessages = async () => {
     try {
       await AsyncStorage.removeItem('messages');
-    } catch (e) { console.log(e.message) }
-  }
+    } catch (e) { console.log(e.message); }
+  };
 
   // Pulls messages from local storage (AsyncStorage)
   const getMessages = async () => {
-    let messages = []
+    let data = []
     try {
-      messages = await AsyncStorage.getItem('messages');
-      console.log(messages)
-      messages ? setMessages(JSON.parse(messages)) : setMessages( [] )
-    } catch (e) { console.log(e.data) }
+      data = await AsyncStorage.getItem('messages');
+      data ? setMessages(JSON.parse(data)) : setMessages( [] )
+    } catch (e) { console.log(e.data); }
   };
 
   // Function called on submit button
-  const onSend = useCallback((messages = []) => {
+  const onSend = useCallback((data = []) => {
     // Defines portion of document to send to database
-    let body = messages[0]
+    const body = data[0];
     // Adds new message to firebase
-    chatLog.add({body})
+    chatLog.add({ body });
     // Adds new message to UI
-    setMessages(previousMessages => 
-      GiftedChat.append(previousMessages, messages)
-    )
+    setMessages((previousMessages) => GiftedChat.append(previousMessages, messages));
     saveMessages();
-  }, [])
+  }, []);
 
   // Renders text-input
   const renderInputToolbar = (props) => {
     // If not online, will render nothing
-    if (!isOnline) {
+    if (!isOnline) return false;
     // Else renders text-input
-    } else {
-      return(
-        <InputToolbar
-        {...props}
-        />
-      );
-    }
-  }
+    return (
+      <InputToolbar {...props}/>
+    );
+  };
 
   // UI for show location function
   const renderCustomView = (props) => {
@@ -206,7 +195,7 @@ export default function ChatScreen(props) {
     }
     // Returns no custom view if message doesn't include geo-location
     return null;
-  }
+  };
 
   // Renders ./CustomActions.js (expandable options bar)
   const renderCustomActions = (props) => {
@@ -214,9 +203,8 @@ export default function ChatScreen(props) {
   };
 
   return (
-    
     // styling background to have color and cover the entire screen
-    <View style={{flex:1, backgroundColor: background}}>
+    <View style={{ flex: 1, backgroundColor: background}}>
 
       {/* using react-native-gifted-chat to display and update messages in view */}
       <GiftedChat
@@ -229,10 +217,10 @@ export default function ChatScreen(props) {
         // Renders toolbar (text and options)
         renderInputToolbar={renderInputToolbar}
         // calls function to update Firebase with new message
-        onSend={messages => onSend(messages)}
+        onSend={(messages) => onSend(messages)}
         // Sets user so messages sent by this user will display on the right
         user={{ _id: uid }}
       />
     </View>
-  )
+  );
 }
