@@ -1,11 +1,11 @@
 /* eslint linebreak-style: ['error', 'windows'] */
 import React from 'react';
-import { 
-  View, Text, TextInput, StyleSheet, TouchableOpacity, ImageBackground
+import {
+  View, Text, TextInput, StyleSheet, TouchableOpacity, ImageBackground,
 } from 'react-native';
 
 // importing image from assets
-const image = require('../assets/Background_Image.png')
+const image = require('../assets/Background_Image.png');
 
 export default class SplashScreen extends React.Component {
   constructor(props) {
@@ -17,10 +17,10 @@ export default class SplashScreen extends React.Component {
 
   render() {
     // creating an array of color options for ease to change if needed
-    const colorOptions = ['#090C08', '#474056', '#8A95A5', '#B9C6AE']
+    const colorOptions = ['#090C08', '#474056', '#8A95A5', '#B9C6AE'];
 
     // setting default of color in case user does not select one
-    if (this.state.color === '') this.setState({ color: colorOptions[0] })
+    if (this.state.color === '') this.setState({ color: colorOptions[0] });
 
     return (
 

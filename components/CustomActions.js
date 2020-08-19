@@ -13,7 +13,13 @@ const firebase = require('firebase');
 require('firebase/firestore');
 
 export default class CustomActions extends React.Component {
-  // Allows user to get picture from gallery
+  /**
+  * Allows user to get picture from gallery
+  * @async
+  * @function pickImage
+  * @param
+  * @returns {file} image
+  */
   pickImage = async () => {
     try {
       // Requests permission to access user's gallery
@@ -33,7 +39,13 @@ export default class CustomActions extends React.Component {
     } catch (e) { console.log(e.message) }
   }
 
-  // Allows user to take a picture and upload to firebase
+  /**
+  * Allows user to take a picture and upload to firebase
+  * @async
+  * @function takePhoto
+  * @param
+  * @returns {file} image
+  */
   takePhoto = async () => {
     try {
       // Requests permission to access user's gallery and camera
@@ -53,7 +65,13 @@ export default class CustomActions extends React.Component {
     } catch (e) { console.log(e.message) }
   }
 
-  // Pulls user's location to send data to firebase
+  /**
+  * Pulls user's location to send data to firebase
+  * @async
+  * @function getLocation
+  * @param
+  * @returns {object} location
+  */
   getLocation = async () => {
     try {
       // Requests permission to access user's geo-location
@@ -75,7 +93,13 @@ export default class CustomActions extends React.Component {
     } catch (e) { console.log(e.message) }
   }
 
-  // Uploads image to firebase with XTMHttp request
+  /**
+  * Uploads image to firebase with XTMHttp request
+  * @async
+  * @function uploadImage
+  * @param {file} uri
+  * @returns {blob} snapshot
+  */
   uploadImage = async (uri) => {
     try {
       // Defines blob (binary large object)
@@ -111,7 +135,16 @@ export default class CustomActions extends React.Component {
     } catch (e) { console.log(e.message); }
   }
 
-  // Defines what options are in the menu
+  /**
+  * Defines what options are in the menu
+  * @function onActionsPress
+  * @param
+  * Returns one of three functions based on user's choice
+  * @returns {function} pickImage
+  * @returns {function} takePhoto
+  * @returns {function} getLocation
+  * @returns null
+  */
   onActionsPress = () => {
     // Defines options for menu
     const options = [

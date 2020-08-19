@@ -31,7 +31,11 @@ export default function ChatScreen(props) {
     });
   }
 
-  // Defines and pulls collection 'chat' from firebase 
+  /**
+  * Defines and pulls collection 'chat' from firebase
+  * @constant
+  * @type {object}
+  */
   const chatLog = firebase.firestore().collection('chat');
 
   // Gets network status
@@ -40,7 +44,13 @@ export default function ChatScreen(props) {
     isConnected ? setOnline(true) : setOnline(false)
   });
 
-  // Function that runs on update of firebase
+  /**
+   * Function that runs on update of firebase
+   * @async
+   * @function onChatUpdate
+   * @param {object} querySnapshot
+   * @return {state} messages
+  */
   const onChatUpdate = (querySnapshot) => {
     const list = [];
     if (querySnapshot) {
@@ -83,12 +93,23 @@ export default function ChatScreen(props) {
     }
   };
 
-  // Pulls localStorage of messages if offline
+  /**
+   * Pulls localStorage of messages if offline
+   * @function getMessages
+   * @param AsyncStorage
+   * @returns {state} messages
+  */
   useEffect(() => {
     getMessages();
   }, [!isOnline]);
 
-  // Runs only when user is online (unsubscribe)
+  /**
+   * Runs only when user is online and runs function onChatUpdate
+   * @function unsubscribe
+   * @param
+   * @returns {function} onChatUpdate
+   * @listens authUnsubscribe
+  */
   useEffect(() => {
     // Updates view to display current chat log
     const unsubscribe = () => {
@@ -97,7 +118,14 @@ export default function ChatScreen(props) {
     unsubscribe();
   }, [uid]);
 
-  // Pulls data from props (Written to run only if userName is not defined)
+  /**
+  * Pulls data from props (Written to run only if userName is not defined)
+  * @constant
+  * @type {string} name
+  * @default 'User'
+  * @type {string} color
+  * @default '#090C08'
+  */
   useEffect(() => {
     // pulls props from previous screen
     const { name, color } = props.route.params;
@@ -110,7 +138,15 @@ export default function ChatScreen(props) {
     props.navigation.setOptions({ title: userName });
   }, [!userName]);
 
-  // useEffect set to run only if user is not logged in (authUnsubscribe)
+  /**
+  * useEffect set to run only if user is not logged in
+  * @async
+  * @function authUnsubscribe
+  * @param firebase
+  * @returns uid (userID)
+  * listens to self to prevent re-renders if ran successfully
+  * @listens authUnsubscribe
+  */
   useEffect(() => {
     const authUnsubscribe = firebase.auth().onAuthStateChanged(async (user) => {
       try {
@@ -123,30 +159,59 @@ export default function ChatScreen(props) {
     authUnsubscribe();
   }, [!uid]);
 
-  // Saves messages to local storage (AsyncStorage)
+  /**
+  * Saves messages to local storage using AsyncStorage
+  * @async
+  * @function saveMessages
+  * @param
+  * @returns {object} messages
+  */
   const saveMessages = async () => {
     try {
       await AsyncStorage.setItem('messages', JSON.stringify(messages));
     } catch (e) { console.log(e.message); }
   };
 
-  // Testing function to clear localStorage
+  /**
+  * Testing function to clear localStorage
+  * Deletes messages from AsyncStorage (localStorage)
+  * @async
+  * @function deleteMessages
+  * @param
+  * @returns null
+  */
   const deleteMessages = async () => {
     try {
       await AsyncStorage.removeItem('messages');
     } catch (e) { console.log(e.message); }
   };
 
-  // Pulls messages from local storage (AsyncStorage)
+  /**
+  * Pulls messages from local storage
+  * @async
+  * @function getMessages
+  * @param
+  * @returns {object} messages
+  * @default []
+  */
   const getMessages = async () => {
-    let data = []
+    let data = [];
     try {
       data = await AsyncStorage.getItem('messages');
       data ? setMessages(JSON.parse(data)) : setMessages( [] )
     } catch (e) { console.log(e.data); }
   };
 
-  // Function called on submit button
+  /**
+  * Function called on submit button
+  * @function onSend
+  * @param {array} data
+  * @default []
+  * @returns {state} GiftedChat
+  * @returns {function} saveMessages
+  * listens for submit button in UI
+  * @listens GiftedChat
+  */
   const onSend = useCallback((data = []) => {
     // Defines portion of document to send to database
     const body = data[0];
@@ -157,7 +222,14 @@ export default function ChatScreen(props) {
     saveMessages();
   }, []);
 
-  // Renders text-input
+  /**
+  * Renders text-input
+  * @function renderInputToolbar
+  * @param {*} props
+  * If/else statement returns one of the following
+  * @returns {boolean} false
+  * @returns {tag} <InputToolbar/>
+  */
   const renderInputToolbar = (props) => {
     // If not online, will render nothing
     if (!isOnline) return false;
@@ -167,9 +239,16 @@ export default function ChatScreen(props) {
     );
   };
 
-  // UI for show location function
+  /**
+  * UI for show location function
+  * @function renderCustomView
+  * @param {*} props
+  * returns one of the following based on boolean
+  * @returns {tag} <MapView/>
+  * @returns null
+  */
   const renderCustomView = (props) => {
-    const { currentMessage} = props;
+    const {currentMessage} = props;
     // Filters through to only run on messages with location
     if (currentMessage.location) {
       return (
@@ -177,10 +256,12 @@ export default function ChatScreen(props) {
           {/* Displays location on map */}
           <MapView
             // CSS for display
-            style={{width: 150,
+            style={{
+              width: 150,
               height: 100,
               borderRadius: 13,
-              margin: 3}}
+              margin: 3,
+            }}
             region={{
               // Data from geo-location
               latitude: currentMessage.location.latitude,
@@ -197,7 +278,12 @@ export default function ChatScreen(props) {
     return null;
   };
 
-  // Renders ./CustomActions.js (expandable options bar)
+  /**
+  * Renders ./CustomActions.js (expandable options bar)
+  * @function renderCustomActions
+  * @param {*} props
+  * @returns {tag} <CustomActions/>
+  */
   const renderCustomActions = (props) => {
     return <CustomActions {...props} />;
   };
