@@ -11,6 +11,7 @@ This project is designed to be a chat interface for mobile devices. It uses Reac
    See prerequisites if you do not have Expo installed already
 + Run command `expo install` in the repository
 + Download the Expo App on any mobile device
+
    Alternatively you can use any phone emulator capable of running the Expo Client
 
 ***
